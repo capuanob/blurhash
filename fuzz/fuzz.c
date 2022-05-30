@@ -3,30 +3,26 @@
 
 #include "encode.h"
 
+#define MAX_DATA_SIZE (sizeof(uint8_t) * 256 * 256 * 4)
+
+uint8_t* rgb_buff = NULL;
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-    int xComponents, yComponents, width, height;
-    size_t bytesPerRow;
+    if (!rgb_buff) rgb_buff = (uint8_t*) malloc(MAX_DATA_SIZE);
+    int width, height;
+    size_t uniq_rgb_values;
 
     // Need enough bytes to fill five parameters at least
-    if (size > 20000 || size < (4 * sizeof(int) + sizeof(size_t)))
+    if (size > MAX_DATA_SIZE || size < (4 * sizeof(int) + sizeof(size_t)) || size % 4 != 0)
         return 0;
 
-    size_t byte_offset = 0;
-    int *fill_arr[] = { &xComponents, &yComponents, &width, &height };
-
-    for (int i = 0; i < 4; ++i) {
-        memcpy(fill_arr[i], data + byte_offset, sizeof(int));
-        byte_offset += sizeof(int);
-    }
-
-    memcpy(&bytesPerRow, data + byte_offset, sizeof(size_t));
-    byte_offset += sizeof(size_t);
+    uniq_rgb_values = (size_t) size / 4;
+    width = 16;
+    height = (int) uniq_rgb_values / width;
 
     // Copy over remaining bytes to be used as RGB data
-    size_t remaining_size = size - byte_offset;
-    uint8_t rgb[remaining_size];
-    memcpy(rgb, data + byte_offset, remaining_size);
+    memcpy(rgb_buff, data, size);
 
-    blurHashForPixels(xComponents, yComponents, width, height, rgb, bytesPerRow);
+    blurHashForPixels(4, 3, width, height, rgb_buff, width * 3);
     return 0;
 }
