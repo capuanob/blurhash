@@ -4,13 +4,11 @@
 #include "encode.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-    if (size > 20000) return 0;
-
     int xComponents, yComponents, width, height;
     size_t bytesPerRow;
 
     // Need enough bytes to fill five parameters at least
-    if (size < (4 * sizeof(int) + sizeof(size_t)))
+    if (size > 20000 || size < (4 * sizeof(int) + sizeof(size_t)))
         return 0;
 
     size_t byte_offset = 0;
