@@ -4,6 +4,8 @@
 #include "encode.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+    if (size > 20000) return 0;
+
     int xComponents, yComponents, width, height;
     size_t bytesPerRow;
 
