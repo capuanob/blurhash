@@ -1,10 +1,9 @@
-image: ghcr.io/capuanob/blurhash-fuzz:latest
 project: blurhash
 target: encode-fuzz
-tests:
+testsuite:
   - file://corpus
 
 cmds:
-  - cmd: /blurhash-fuzz -close_fd_mask=2
+  - cmd: /blurhash-fuzz
     libfuzzer: true
-    max_length: 300000
+    max_length: 5000
