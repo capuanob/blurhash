@@ -12,7 +12,7 @@ WORKDIR blurhash
 ## Build
 WORKDIR ext/blurhash
 RUN ruby extconf.rb
-RUN make
+RUN make V=1 CFLAGS="-fsanitize=fuzzer-no-link -fPIC" LDFLAGS="-fsanitize=fuzzer-no-link" CC=clang
 RUN cp encode.so /usr/lib
 WORKDIR /blurhash
 RUN clang -fsanitize=fuzzer fuzz/fuzz_blur_pixels.c -Lencode -I ext/blurhash/ -L/usr/lib -l:encode.so -o blurhash-fuzz
