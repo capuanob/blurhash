@@ -9,20 +9,28 @@ uint8_t* rgb_buff = NULL;
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     if (!rgb_buff) rgb_buff = (uint8_t*) malloc(MAX_DATA_SIZE);
-    int width, height;
-    size_t uniq_rgb_values;
+    int width, height, xComponents, yComponents;
+    size_t bytesPerRow;
 
     // Need enough bytes to fill five parameters at least
     if (size > MAX_DATA_SIZE || size < (4 * sizeof(int) + sizeof(size_t)) || size % 4 != 0)
         return 0;
 
-    uniq_rgb_values = (size_t) size / 4;
-    width = 16;
-    height = (int) uniq_rgb_values / width;
-
-    // Copy over remaining bytes to be used as RGB data
+    // Copy over bytes to be used as RGB data
     memcpy(rgb_buff, data, size);
 
-    blurHashForPixels(4, 3, width, height, rgb_buff, width * 3);
+    xComponents = (int) rgb_buff;
+    rgb_buff += sizeof(int);
+    yComponents = (int) rgb_buff;
+    rgb_buff += sizeof(int);
+    width = (int) rgb_buff;
+    rgb_buff += sizeof(int);
+    height = (int) rgb_buff;
+    rgb_buff += sizeof(int);
+    bytesPerRow = (size_t) rgb_buff;
+    rgb_buff += sizeof(size_t);
+
+    blurHashForPixels(xComponents, yComponents, width, height, rgb_buff, bytesPerRow);
+
     return 0;
 }
